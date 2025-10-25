@@ -14,6 +14,7 @@ const ExerciseDetail: React.FC = () => {
   const [result, setResult] = useState<CodeSubmissionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showIdealSolution, setShowIdealSolution] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -138,7 +139,37 @@ const ExerciseDetail: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+      </div>
+
+      <div className="card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <h3>Your Code</h3>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => setIsDarkTheme(!isDarkTheme)}
+            style={{ fontSize: '14px', padding: '8px 16px' }}
+          >
+            {isDarkTheme ? '☀️ Light' : '🌙 Dark'}
+          </button>
+        </div>
+        <div className="code-editor">
+          <Editor
+            height="600px"
+            defaultLanguage="csharp"
+            value={userCode}
+            onChange={(value) => setUserCode(value || '')}
+            theme={isDarkTheme ? 'vs-dark' : 'vs-light'}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 14,
+              lineNumbers: 'on',
+              roundedSelection: false,
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+            }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
           <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
             {submitting ? 'Running...' : 'Run Code'}
           </button>
@@ -154,97 +185,75 @@ const ExerciseDetail: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-2">
-        <div className="card">
-          <h3>Your Code</h3>
-          <div className="code-editor">
-            <Editor
-              height="400px"
-              defaultLanguage="csharp"
-              value={userCode}
-              onChange={(value) => setUserCode(value || '')}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 14,
-                lineNumbers: 'on',
-                roundedSelection: false,
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-              }}
-            />
-          </div>
-        </div>
+      <div className="card">
+        <h3>Output & Results</h3>
+        {result ? (
+          <div>
+            {result.executionResult.isSuccess ? (
+              <div>
+                <div className={`output-panel success-output`}>
+                  <strong>Execution Time:</strong> {result.executionResult.executionTimeMs}ms
+                  {result.executionResult.output && (
+                    <>
+                      <br /><br />
+                      <strong>Output:</strong><br />
+                      {result.executionResult.output}
+                    </>
+                  )}
+                </div>
 
-        <div className="card">
-          <h3>Output & Results</h3>
-          {result ? (
-            <div>
-              {result.executionResult.isSuccess ? (
-                <div>
-                  <div className={`output-panel success-output`}>
-                    <strong>Execution Time:</strong> {result.executionResult.executionTimeMs}ms
-                    {result.executionResult.output && (
-                      <>
-                        <br /><br />
-                        <strong>Output:</strong><br />
-                        {result.executionResult.output}
-                      </>
-                    )}
+                {result.performanceAnalysis && (
+                  <div className={`performance-score ${getPerformanceClass(result.performanceAnalysis.level)}`}>
+                    <div>Performance Score</div>
+                    <div style={{ fontSize: '36px' }}>{result.performanceAnalysis.performanceScore.toFixed(1)}</div>
+                    <div style={{ fontSize: '14px' }}>{getPerformanceLevelDisplay(result.performanceAnalysis.level)}</div>
                   </div>
+                )}
 
-                  {result.performanceAnalysis && (
-                    <div className={`performance-score ${getPerformanceClass(result.performanceAnalysis.level)}`}>
-                      <div>Performance Score</div>
-                      <div style={{ fontSize: '36px' }}>{result.performanceAnalysis.performanceScore.toFixed(1)}</div>
-                      <div style={{ fontSize: '14px' }}>{getPerformanceLevelDisplay(result.performanceAnalysis.level)}</div>
+                <div className="card" style={{ marginTop: '15px' }}>
+                  <h4>Analysis</h4>
+                  <p>{result.performanceAnalysis?.analysis}</p>
+                  
+                  {result.performanceAnalysis?.recommendations && result.performanceAnalysis.recommendations.length > 0 && (
+                    <div>
+                      <h5>Recommendations:</h5>
+                      <ul>
+                        {result.performanceAnalysis.recommendations.map((rec, index) => (
+                          <li key={index}>{rec}</li>
+                        ))}
+                      </ul>
                     </div>
                   )}
-
-                  <div className="card" style={{ marginTop: '15px' }}>
-                    <h4>Analysis</h4>
-                    <p>{result.performanceAnalysis?.analysis}</p>
-                    
-                    {result.performanceAnalysis?.recommendations && result.performanceAnalysis.recommendations.length > 0 && (
-                      <div>
-                        <h5>Recommendations:</h5>
-                        <ul>
-                          {result.performanceAnalysis.recommendations.map((rec, index) => (
-                            <li key={index}>{rec}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
                 </div>
-              ) : (
-                <div className={`output-panel error-output`}>
-                  <strong>Error:</strong><br />
-                  {result.executionResult.compilationError && (
-                    <>
-                      <strong>Compilation Error:</strong><br />
-                      {result.executionResult.compilationError}<br /><br />
-                    </>
-                  )}
-                  {result.executionResult.runtimeError && (
-                    <>
-                      <strong>Runtime Error:</strong><br />
-                      {result.executionResult.runtimeError}
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : error ? (
-            <div className={`output-panel error-output`}>
-              <strong>Error:</strong><br />
-              {error}
-            </div>
-          ) : (
-            <div className="output-panel">
-              Click "Run Code" to execute your solution and see the results here.
-            </div>
-          )}
-        </div>
+              </div>
+            ) : (
+              <div className={`output-panel error-output`}>
+                <strong>Error:</strong><br />
+                {result.executionResult.compilationError && (
+                  <>
+                    <strong>Compilation Error:</strong><br />
+                    {result.executionResult.compilationError}<br /><br />
+                  </>
+                )}
+                {result.executionResult.runtimeError && (
+                  <>
+                    <strong>Runtime Error:</strong><br />
+                    {result.executionResult.runtimeError}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        ) : error ? (
+          <div className={`output-panel error-output`}>
+            <strong>Error:</strong><br />
+            {error}
+          </div>
+        ) : (
+          <div className="output-panel">
+            Click "Run Code" to execute your solution and see the results here.
+          </div>
+        )}
       </div>
 
       {showIdealSolution && (
@@ -255,6 +264,7 @@ const ExerciseDetail: React.FC = () => {
               height="300px"
               defaultLanguage="csharp"
               value={exercise.idealSolution}
+              theme={isDarkTheme ? 'vs-dark' : 'vs-light'}
               options={{
                 readOnly: true,
                 minimap: { enabled: false },
