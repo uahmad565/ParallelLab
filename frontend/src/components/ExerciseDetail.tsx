@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Editor } from '@monaco-editor/react';
+import * as monaco from 'monaco-editor';
 import { Exercise, CodeSubmissionRequest, CodeSubmissionResponse, PerformanceLevel } from '../types';
 import { exerciseApi, submissionApi } from '../services/api';
 
@@ -21,6 +22,40 @@ const ExerciseDetail: React.FC = () => {
       loadExercise(parseInt(id));
     }
   }, [id]);
+
+  useEffect(() => {
+    // Configure basic C# language features
+    const configureCSharpLanguage = () => {
+      // Set up C# language configuration for better syntax support
+      monaco.languages.setLanguageConfiguration('csharp', {
+        comments: {
+          lineComment: '//',
+          blockComment: ['/*', '*/']
+        },
+        brackets: [
+          ['{', '}'],
+          ['[', ']'],
+          ['(', ')']
+        ],
+        autoClosingPairs: [
+          { open: '{', close: '}' },
+          { open: '[', close: ']' },
+          { open: '(', close: ')' },
+          { open: '"', close: '"' },
+          { open: "'", close: "'" }
+        ],
+        surroundingPairs: [
+          { open: '{', close: '}' },
+          { open: '[', close: ']' },
+          { open: '(', close: ')' },
+          { open: '"', close: '"' },
+          { open: "'", close: "'" }
+        ]
+      });
+    };
+
+    configureCSharpLanguage();
+  }, []);
 
   const loadExercise = async (exerciseId: number) => {
     try {
@@ -166,6 +201,21 @@ const ExerciseDetail: React.FC = () => {
               roundedSelection: false,
               scrollBeyondLastLine: false,
               automaticLayout: true,
+              quickSuggestions: {
+                other: true,
+                comments: true,
+                strings: true
+              },
+              suggestOnTriggerCharacters: true,
+              acceptSuggestionOnEnter: 'on',
+              tabCompletion: 'on',
+              wordBasedSuggestions: 'matchingDocuments',
+              parameterHints: {
+                enabled: true
+              },
+              hover: {
+                enabled: true
+              }
             }}
           />
         </div>
@@ -261,7 +311,7 @@ const ExerciseDetail: React.FC = () => {
           <h3>Ideal Solution</h3>
           <div className="code-editor">
             <Editor
-              height="300px"
+              height="700px"
               defaultLanguage="csharp"
               value={exercise.idealSolution}
               theme={isDarkTheme ? 'vs-dark' : 'vs-light'}
@@ -273,6 +323,21 @@ const ExerciseDetail: React.FC = () => {
                 roundedSelection: false,
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
+                quickSuggestions: {
+                  other: true,
+                  comments: true,
+                  strings: true
+                },
+                suggestOnTriggerCharacters: true,
+                acceptSuggestionOnEnter: 'on',
+                tabCompletion: 'on',
+                wordBasedSuggestions: 'matchingDocuments',
+                parameterHints: {
+                  enabled: true
+                },
+                hover: {
+                  enabled: true
+                }
               }}
             />
           </div>
