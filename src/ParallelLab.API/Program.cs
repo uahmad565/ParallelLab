@@ -4,6 +4,7 @@ using ParallelLab.Core.Services;
 using ParallelLab.Infrastructure.Data;
 using ParallelLab.Infrastructure.Repositories;
 using ParallelLab.Infrastructure.Services;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,28 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "ParallelLab API",
+        Version = "v1",
+        Description = "API for Parallel Programming Lab - Exercise submission and code execution",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "ParallelLab",
+            Email = "support@parallellab.com"
+        }
+    });
+    
+    // Include XML comments if available
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+});
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -44,11 +66,17 @@ builder.Services.AddScoped<IPerformanceAnalysisService, PerformanceAnalysisServi
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Enable Swagger in all environments
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "ParallelLab API v1");
+    options.RoutePrefix = "swagger"; // Set Swagger UI at the app's root
+    options.DisplayRequestDuration();
+    options.EnableDeepLinking();
+    options.EnableFilter();
+    options.EnableValidator();
+});
 
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
