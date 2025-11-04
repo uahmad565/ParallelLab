@@ -62,6 +62,7 @@ builder.Services.AddScoped<IExerciseSubmissionRepository, ExerciseSubmissionRepo
 // Add services
 builder.Services.AddScoped<ICodeExecutionService, CodeExecutionService>();
 builder.Services.AddScoped<IPerformanceAnalysisService, PerformanceAnalysisService>();
+builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
 
 var app = builder.Build();
 
@@ -82,6 +83,10 @@ app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 app.UseAuthorization();
 app.MapControllers();
+
+// Redirect root ("/") to the Swagger UI.
+// Place this before app.Run() so it takes effect and is reachable.
+app.MapGet("/", () => Results.Redirect("/swagger", permanent: false));
 
 // Ensure database is created and seed data
 using (var scope = app.Services.CreateScope())

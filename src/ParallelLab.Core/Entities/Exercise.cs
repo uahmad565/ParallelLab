@@ -41,6 +41,7 @@ public class Exercise
     
     // Navigation properties
     public ICollection<ExerciseSubmission> Submissions { get; set; } = new List<ExerciseSubmission>();
+    public ICollection<TestCase> TestCases { get; set; } = new List<TestCase>();
 }
 
 public enum ExerciseCategory

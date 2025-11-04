@@ -12,6 +12,7 @@ public class SubmissionsController : ControllerBase
     private readonly IExerciseRepository _exerciseRepository;
     private readonly IExerciseSubmissionRepository _submissionRepository;
     private readonly ICodeExecutionService _codeExecutionService;
+    private readonly ICodeRunnerService _codeRunnerService;
     private readonly IPerformanceAnalysisService _performanceAnalysisService;
     private readonly ILogger<SubmissionsController> _logger;
 
@@ -19,12 +20,14 @@ public class SubmissionsController : ControllerBase
         IExerciseRepository exerciseRepository,
         IExerciseSubmissionRepository submissionRepository,
         ICodeExecutionService codeExecutionService,
+        ICodeRunnerService codeRunnerService,
         IPerformanceAnalysisService performanceAnalysisService,
         ILogger<SubmissionsController> logger)
     {
         _exerciseRepository = exerciseRepository;
         _submissionRepository = submissionRepository;
         _codeExecutionService = codeExecutionService;
+        _codeRunnerService = codeRunnerService;
         _performanceAnalysisService = performanceAnalysisService;
         _logger = logger;
     }
@@ -37,65 +40,108 @@ public class SubmissionsController : ControllerBase
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Get the exercise
+            // Get the exercise with test cases
             var exercise = await _exerciseRepository.GetByIdAsync(request.ExerciseId);
             if (exercise == null)
                 return NotFound("Exercise not found");
 
-            // Execute the user's code
-            var executionResult = await _codeExecutionService.ExecuteCodeAsync(
-                request.UserCode, 
-                exercise.TestData, 
-                exercise.MaxExecutionTimeMs);
+            if (exercise.TestCases == null || !exercise.TestCases.Any())
+                return BadRequest("Exercise has no test cases defined");
 
             // Create submission record
             var submission = new ExerciseSubmission
             {
                 ExerciseId = request.ExerciseId,
                 UserCode = request.UserCode,
-                CompilationError = executionResult.CompilationError,
-                RuntimeError = executionResult.RuntimeError,
-                ExecutionTimeMs = executionResult.ExecutionTimeMs,
-                IsCorrect = executionResult.IsCorrect,
-                Output = executionResult.Output,
                 UserId = request.UserId ?? "anonymous",
-                Exercise = exercise // Set the exercise navigation property
+                Exercise = exercise
             };
 
             // Save the submission first to get the ID
             var createdSubmission = await _submissionRepository.CreateAsync(submission);
 
-            // If execution was successful, perform performance analysis
-            if (executionResult.IsSuccess)
+            // Run code against all test cases
+            var testCaseResults = new List<TestCaseResult>();
+            var allPassed = true;
+            long totalExecutionTime = 0;
+            string? compilationError = null;
+
+            foreach (var testCase in exercise.TestCases.OrderBy(tc => tc.Order))
             {
-                var performanceAnalysis = await _performanceAnalysisService.AnalyzePerformanceAsync(
-                    createdSubmission, 
-                    exercise.ExpectedExecutionTimeMs);
+                _logger.LogInformation("Running test case {TestCaseId} for submission {SubmissionId}", 
+                    testCase.Id, createdSubmission.Id);
 
-                createdSubmission.PerformanceScore = performanceAnalysis.PerformanceScore;
+                var runnerResponse = await _codeRunnerService.RunCodeAsync(
+                    request.UserCode, 
+                    testCase.Input, 
+                    testCase.TimeoutMs);
 
-                // Create performance comparison with the saved submission
-                var comparison = await _performanceAnalysisService.CompareWithIdealAsync(
-                    createdSubmission, 
-                    exercise.IdealSolution, 
-                    exercise.TestData);
+                var actualOutput = runnerResponse.StandardOutput.TrimEnd('\r', '\n');
+                var expectedOutput = testCase.ExpectedOutput.TrimEnd('\r', '\n');
+                var passed = runnerResponse.ExitCode == 0 && 
+                            !runnerResponse.TimedOut && 
+                            actualOutput == expectedOutput;
 
-                await _submissionRepository.CreatePerformanceComparisonAsync(comparison);
+                if (!passed)
+                    allPassed = false;
+
+                if (!string.IsNullOrEmpty(runnerResponse.StandardError) && runnerResponse.ExitCode != 0)
+                {
+                    compilationError = runnerResponse.StandardError;
+                }
+
+                var testCaseResult = new TestCaseResult
+                {
+                    SubmissionId = createdSubmission.Id,
+                    TestCaseId = testCase.Id,
+                    Passed = passed,
+                    ActualOutput = actualOutput,
+                    ExpectedOutput = expectedOutput,
+                    ExecutionTimeMs = runnerResponse.ElapsedMilliseconds,
+                    TimedOut = runnerResponse.TimedOut,
+                    ExitCode = runnerResponse.ExitCode,
+                    StandardError = runnerResponse.StandardError
+                };
+
+                testCaseResults.Add(testCaseResult);
+                totalExecutionTime += runnerResponse.ElapsedMilliseconds;
             }
+
+            // Update submission with results
+            createdSubmission.IsCorrect = allPassed;
+            createdSubmission.ExecutionTimeMs = totalExecutionTime / exercise.TestCases.Count; // Average execution time
+            createdSubmission.CompilationError = compilationError;
+            createdSubmission.Output = string.Join("\n", testCaseResults.Select(r => 
+                $"Test {r.TestCaseId}: {(r.Passed ? "PASSED" : "FAILED")} ({r.ExecutionTimeMs}ms)"));
+
+            // Calculate performance score
+            if (allPassed)
+            {
+                var avgIdealTime = exercise.TestCases.Average(tc => tc.IdealExecutionTimeMs);
+                var performanceRatio = (double)avgIdealTime / createdSubmission.ExecutionTimeMs;
+                createdSubmission.PerformanceScore = Math.Min(100, performanceRatio * 100);
+            }
+
+            // Save test case results
+            foreach (var result in testCaseResults)
+            {
+                await _submissionRepository.CreateTestCaseResultAsync(result);
+            }
+
+            await _submissionRepository.UpdateAsync(createdSubmission);
 
             return Ok(new CodeSubmissionResponse
             {
                 Submission = createdSubmission,
-                ExecutionResult = executionResult,
-                PerformanceAnalysis = executionResult.IsSuccess ? 
-                    await _performanceAnalysisService.AnalyzePerformanceAsync(createdSubmission, exercise.ExpectedExecutionTimeMs) : 
-                    null
+                TestCaseResults = testCaseResults,
+                TotalTests = testCaseResults.Count,
+                PassedTests = testCaseResults.Count(r => r.Passed)
             });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error submitting code for exercise {ExerciseId}", request.ExerciseId);
-            return StatusCode(500, "Internal server error");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
 
@@ -158,8 +204,9 @@ public class CodeSubmissionRequest
 public class CodeSubmissionResponse
 {
     public ExerciseSubmission Submission { get; set; } = null!;
-    public CodeExecutionResult ExecutionResult { get; set; } = null!;
-    public PerformanceAnalysisResult? PerformanceAnalysis { get; set; }
+    public List<TestCaseResult> TestCaseResults { get; set; } = new();
+    public int TotalTests { get; set; }
+    public int PassedTests { get; set; }
 }
 
 

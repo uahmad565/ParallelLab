@@ -12,6 +12,8 @@ public class ParallelLabDbContext : DbContext
     public DbSet<Exercise> Exercises { get; set; }
     public DbSet<ExerciseSubmission> ExerciseSubmissions { get; set; }
     public DbSet<PerformanceComparison> PerformanceComparisons { get; set; }
+    public DbSet<TestCase> TestCases { get; set; }
+    public DbSet<TestCaseResult> TestCaseResults { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,6 +57,37 @@ public class ParallelLabDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.SubmissionId)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // TestCase configuration
+        modelBuilder.Entity<TestCase>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Input).IsRequired();
+            entity.Property(e => e.ExpectedOutput).IsRequired();
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            
+            entity.HasOne(e => e.Exercise)
+                  .WithMany(e => e.TestCases)
+                  .HasForeignKey(e => e.ExerciseId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // TestCaseResult configuration
+        modelBuilder.Entity<TestCaseResult>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.ExecutedAt).HasDefaultValueSql("GETUTCDATE()");
+            
+            entity.HasOne(e => e.Submission)
+                  .WithMany(e => e.TestCaseResults)
+                  .HasForeignKey(e => e.SubmissionId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasOne(e => e.TestCase)
+                  .WithMany()
+                  .HasForeignKey(e => e.TestCaseId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

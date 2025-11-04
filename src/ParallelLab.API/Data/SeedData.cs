@@ -15,6 +15,69 @@ public static class SeedData
         {
             new Exercise
             {
+                Title = "Hello World Console App",
+                Description = "Create a simple console application that reads input and outputs it",
+                ProblemStatement = @"Create a C# console application that:
+1. Reads a line from Console input
+2. Outputs that line to Console
+
+This is a basic test to verify your code execution environment works correctly.",
+                StartingCode = @"using System;
+
+class Solution 
+{ 
+    static void Main()
+    { 
+        // TODO: Read from Console and write to Console
+    } 
+}",
+                IdealSolution = @"using System;
+
+class Solution 
+{ 
+    static void Main()
+    { 
+        Console.WriteLine(Console.ReadLine()); 
+    } 
+}",
+                TestData = "",
+                Category = ExerciseCategory.Threads,
+                Difficulty = DifficultyLevel.Beginner,
+                ExpectedExecutionTimeMs = 50,
+                MaxExecutionTimeMs = 1000,
+                TestCases = new List<TestCase>
+                {
+                    new TestCase
+                    {
+                        Input = "Hello World",
+                        ExpectedOutput = "Hello World",
+                        TimeoutMs = 1000,
+                        IdealExecutionTimeMs = 50,
+                        IsHidden = false,
+                        Order = 1
+                    },
+                    new TestCase
+                    {
+                        Input = "Test 123",
+                        ExpectedOutput = "Test 123",
+                        TimeoutMs = 1000,
+                        IdealExecutionTimeMs = 50,
+                        IsHidden = false,
+                        Order = 2
+                    },
+                    new TestCase
+                    {
+                        Input = "Parallel Programming",
+                        ExpectedOutput = "Parallel Programming",
+                        TimeoutMs = 1000,
+                        IdealExecutionTimeMs = 50,
+                        IsHidden = true,
+                        Order = 3
+                    }
+                }
+            },
+            new Exercise
+            {
                 Title = "Parallel Array Processing with Threads",
                 Description = "Process a large array using multiple threads to improve performance",
                 ProblemStatement = @"You are given a large array of integers. Your task is to calculate the sum of squares of all even numbers in the array using multiple threads.

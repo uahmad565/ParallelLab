@@ -16,10 +16,12 @@ public interface IExerciseRepository
 public interface IExerciseSubmissionRepository
 {
     Task<ExerciseSubmission> CreateAsync(ExerciseSubmission submission);
+    Task<ExerciseSubmission> UpdateAsync(ExerciseSubmission submission);
     Task<ExerciseSubmission?> GetByIdAsync(int id);
     Task<IEnumerable<ExerciseSubmission>> GetByExerciseIdAsync(int exerciseId);
     Task<IEnumerable<ExerciseSubmission>> GetByUserIdAsync(string userId);
     Task<PerformanceComparison> CreatePerformanceComparisonAsync(PerformanceComparison comparison);
+    Task<TestCaseResult> CreateTestCaseResultAsync(TestCaseResult result);
 }
 
 

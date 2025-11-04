@@ -239,60 +239,88 @@ const ExerciseDetail: React.FC = () => {
         <h3>Output & Results</h3>
         {result ? (
           <div>
-            {result.executionResult.isSuccess ? (
-              <div>
-                <div className={`output-panel success-output`}>
-                  <strong>Execution Time:</strong> {result.executionResult.executionTimeMs}ms
-                  {result.executionResult.output && (
-                    <>
-                      <br /><br />
-                      <strong>Output:</strong><br />
-                      {result.executionResult.output}
-                    </>
-                  )}
-                </div>
-
-                {result.performanceAnalysis && (
-                  <div className={`performance-score ${getPerformanceClass(result.performanceAnalysis.level)}`}>
-                    <div>Performance Score</div>
-                    <div style={{ fontSize: '36px' }}>{result.performanceAnalysis.performanceScore.toFixed(1)}</div>
-                    <div style={{ fontSize: '14px' }}>{getPerformanceLevelDisplay(result.performanceAnalysis.level)}</div>
-                  </div>
+            <div>
+              {/* Test Results Summary */}
+              <div className={`output-panel ${result.submission.isCorrect ? 'success-output' : 'error-output'}`}>
+                <strong>Test Results:</strong> {result.passedTests} / {result.totalTests} passed
+                <br />
+                <strong>Average Execution Time:</strong> {result.submission.executionTimeMs}ms
+                {result.submission.performanceScore > 0 && (
+                  <>
+                    <br />
+                    <strong>Performance Score:</strong> {result.submission.performanceScore.toFixed(1)}
+                  </>
                 )}
+              </div>
 
-                <div className="card" style={{ marginTop: '15px' }}>
-                  <h4>Analysis</h4>
-                  <p>{result.performanceAnalysis?.analysis}</p>
-                  
-                  {result.performanceAnalysis?.recommendations && result.performanceAnalysis.recommendations.length > 0 && (
-                    <div>
-                      <h5>Recommendations:</h5>
-                      <ul>
-                        {result.performanceAnalysis.recommendations.map((rec, index) => (
-                          <li key={index}>{rec}</li>
-                        ))}
-                      </ul>
+              {/* Individual Test Case Results */}
+              {result.testCaseResults && result.testCaseResults.length > 0 && (
+                <div style={{ marginTop: '15px' }}>
+                  <h4>Test Cases</h4>
+                  {result.testCaseResults.map((testResult, index) => (
+                    <div 
+                      key={testResult.id} 
+                      className={`card`}
+                      style={{ 
+                        marginTop: '10px', 
+                        padding: '10px',
+                        border: testResult.passed ? '2px solid #4caf50' : '2px solid #f44336'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Test Case #{index + 1}</strong>
+                        <span style={{ 
+                          padding: '5px 10px', 
+                          borderRadius: '4px',
+                          backgroundColor: testResult.passed ? '#4caf50' : '#f44336',
+                          color: 'white'
+                        }}>
+                          {testResult.passed ? '✓ PASSED' : '✗ FAILED'}
+                        </span>
+                      </div>
+                      <div style={{ marginTop: '10px', fontSize: '14px' }}>
+                        <strong>Execution Time:</strong> {testResult.executionTimeMs}ms
+                        {testResult.timedOut && <span style={{ color: '#f44336' }}> (Timed Out)</span>}
+                        <br />
+                        <strong>Exit Code:</strong> {testResult.exitCode}
+                      </div>
+                      {!testResult.passed && (
+                        <div style={{ marginTop: '10px' }}>
+                          <div style={{ marginBottom: '5px' }}>
+                            <strong>Expected Output:</strong>
+                            <pre style={{ backgroundColor: '#f5f5f5', padding: '8px', borderRadius: '4px', margin: '5px 0', fontSize: '12px' }}>
+                              {testResult.expectedOutput || '(empty)'}
+                            </pre>
+                          </div>
+                          <div>
+                            <strong>Actual Output:</strong>
+                            <pre style={{ backgroundColor: '#f5f5f5', padding: '8px', borderRadius: '4px', margin: '5px 0', fontSize: '12px' }}>
+                              {testResult.actualOutput || '(empty)'}
+                            </pre>
+                          </div>
+                          {testResult.standardError && (
+                            <div>
+                              <strong>Error:</strong>
+                              <pre style={{ backgroundColor: '#ffe6e6', padding: '8px', borderRadius: '4px', margin: '5px 0', fontSize: '12px' }}>
+                                {testResult.standardError}
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
-              </div>
-            ) : (
-              <div className={`output-panel error-output`}>
-                <strong>Error:</strong><br />
-                {result.executionResult.compilationError && (
-                  <>
-                    <strong>Compilation Error:</strong><br />
-                    {result.executionResult.compilationError}<br /><br />
-                  </>
-                )}
-                {result.executionResult.runtimeError && (
-                  <>
-                    <strong>Runtime Error:</strong><br />
-                    {result.executionResult.runtimeError}
-                  </>
-                )}
-              </div>
-            )}
+              )}
+
+              {/* Compilation Error if any */}
+              {result.submission.compilationError && (
+                <div className="output-panel error-output" style={{ marginTop: '15px' }}>
+                  <strong>Compilation Error:</strong><br />
+                  <pre style={{ whiteSpace: 'pre-wrap', fontSize: '12px' }}>{result.submission.compilationError}</pre>
+                </div>
+              )}
+            </div>
           </div>
         ) : error ? (
           <div className={`output-panel error-output`}>

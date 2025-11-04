@@ -63,9 +63,27 @@ export interface CodeSubmissionRequest {
   userId?: string;
 }
 
+export interface TestCaseResult {
+  id: number;
+  submissionId: number;
+  testCaseId: number;
+  passed: boolean;
+  actualOutput: string;
+  expectedOutput: string;
+  executionTimeMs: number;
+  timedOut: boolean;
+  exitCode: number;
+  standardError?: string;
+  executedAt: string;
+}
+
 export interface CodeSubmissionResponse {
   submission: ExerciseSubmission;
-  executionResult: CodeExecutionResult;
+  testCaseResults: TestCaseResult[];
+  totalTests: number;
+  passedTests: number;
+  // Legacy fields for backward compatibility
+  executionResult?: CodeExecutionResult;
   performanceAnalysis?: PerformanceAnalysisResult;
 }
 

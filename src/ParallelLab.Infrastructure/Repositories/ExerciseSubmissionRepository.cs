@@ -45,11 +45,25 @@ public class ExerciseSubmissionRepository : IExerciseSubmissionRepository
             .ToListAsync();
     }
 
+    public async Task<ExerciseSubmission> UpdateAsync(ExerciseSubmission submission)
+    {
+        _context.ExerciseSubmissions.Update(submission);
+        await _context.SaveChangesAsync();
+        return submission;
+    }
+
     public async Task<PerformanceComparison> CreatePerformanceComparisonAsync(PerformanceComparison comparison)
     {
         _context.PerformanceComparisons.Add(comparison);
         await _context.SaveChangesAsync();
         return comparison;
+    }
+
+    public async Task<TestCaseResult> CreateTestCaseResultAsync(TestCaseResult result)
+    {
+        _context.TestCaseResults.Add(result);
+        await _context.SaveChangesAsync();
+        return result;
     }
 }
 

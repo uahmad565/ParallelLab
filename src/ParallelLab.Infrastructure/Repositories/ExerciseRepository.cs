@@ -27,6 +27,7 @@ public class ExerciseRepository : IExerciseRepository
     {
         return await _context.Exercises
             .Include(e => e.Submissions)
+            .Include(e => e.TestCases)
             .FirstOrDefaultAsync(e => e.Id == id && e.IsActive);
     }
 

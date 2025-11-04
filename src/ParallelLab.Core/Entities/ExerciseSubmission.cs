@@ -29,6 +29,7 @@ public class ExerciseSubmission
     
     // Navigation properties
     public Exercise Exercise { get; set; } = null!;
+    public ICollection<TestCaseResult> TestCaseResults { get; set; } = new List<TestCaseResult>();
 }
 
 public class PerformanceComparison
