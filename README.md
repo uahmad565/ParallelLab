@@ -73,7 +73,7 @@ ParallelLab/
    dotnet run --project src/ParallelLab.API
    ```
 
-   The API will be available at `https://localhost:7000` (HTTPS) or `http://localhost:5000` (HTTP).
+   The API will be available at `https://localhost:5000` (HTTPS) or `http://localhost:7000` (HTTP).
 
 ### Frontend Setup
 
