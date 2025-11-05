@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Home from './components/Home';
 import ExerciseList from './components/ExerciseList';
 import ExerciseDetail from './components/ExerciseDetail';
 import SubmissionHistory from './components/SubmissionHistory';
@@ -11,13 +12,24 @@ function App() {
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="App">
         <Navbar />
-        <div className="container">
-          <Routes>
-            <Route path="/" element={<ExerciseList />} />
-            <Route path="/exercise/:id" element={<ExerciseDetail />} />
-            <Route path="/submissions" element={<SubmissionHistory />} />
-          </Routes>
-        </div>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/exercises" element={
+            <div className="container">
+              <ExerciseList />
+            </div>
+          } />
+          <Route path="/exercise/:id" element={
+            <div className="container">
+              <ExerciseDetail />
+            </div>
+          } />
+          <Route path="/submissions" element={
+            <div className="container">
+              <SubmissionHistory />
+            </div>
+          } />
+        </Routes>
       </div>
     </Router>
   );
