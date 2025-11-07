@@ -9,6 +9,7 @@ public class ParallelLabDbContext : DbContext
     {
     }
 
+    public DbSet<User> Users { get; set; }
     public DbSet<Exercise> Exercises { get; set; }
     public DbSet<ExerciseSubmission> ExerciseSubmissions { get; set; }
     public DbSet<PerformanceComparison> PerformanceComparisons { get; set; }
@@ -18,6 +19,20 @@ public class ParallelLabDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // User configuration
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Username).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.PasswordHash).IsRequired();
+            entity.Property(e => e.FullName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Role).HasConversion<string>();
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            entity.HasIndex(e => e.Username).IsUnique();
+            entity.HasIndex(e => e.Email).IsUnique();
+        });
 
         // Exercise configuration
         modelBuilder.Entity<Exercise>(entity =>

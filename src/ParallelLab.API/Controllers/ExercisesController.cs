@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ParallelLab.Core.Entities;
 using ParallelLab.Core.Interfaces;
 using ParallelLab.Core.Services;
+using System.Security.Claims;
 
 namespace ParallelLab.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ExercisesController : ControllerBase
@@ -35,6 +38,17 @@ public class ExercisesController : ControllerBase
         try
         {
             var exercises = await _exerciseRepository.GetAllAsync();
+            
+            // Filter exercises based on user role
+            var userRole = GetUserRole();
+            
+            if (userRole == UserRole.User)
+            {
+                // Regular users can only see Beginner exercises
+                exercises = exercises.Where(e => e.Difficulty == DifficultyLevel.Beginner).ToList();
+            }
+            // PremiumUser and Admin can see all exercises
+            
             return Ok(exercises);
         }
         catch (Exception ex)
@@ -42,6 +56,17 @@ public class ExercisesController : ControllerBase
             _logger.LogError(ex, "Error retrieving exercises");
             return StatusCode(500, "Internal server error");
         }
+    }
+
+    private UserRole GetUserRole()
+    {
+        var roleClaim = User.FindFirst(ClaimTypes.Role);
+        if (roleClaim == null)
+            return UserRole.User; // Default to User if not authenticated
+
+        return Enum.TryParse<UserRole>(roleClaim.Value, out var role) 
+            ? role 
+            : UserRole.User;
     }
 
     [HttpGet("{id}")]
@@ -52,6 +77,14 @@ public class ExercisesController : ControllerBase
             var exercise = await _exerciseRepository.GetByIdAsync(id);
             if (exercise == null)
                 return NotFound();
+
+            // Check if user has access to this exercise
+            var userRole = GetUserRole();
+            
+            if (userRole == UserRole.User && exercise.Difficulty != DifficultyLevel.Beginner)
+            {
+                return StatusCode(403, new { message = "Upgrade to Premium to access this exercise" });
+            }
 
             return Ok(exercise);
         }

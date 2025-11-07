@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ParallelLab.Core.Interfaces;
 using ParallelLab.Core.Services;
 using ParallelLab.Infrastructure.Data;
 using ParallelLab.Infrastructure.Repositories;
 using ParallelLab.Infrastructure.Services;
 using System.IO;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,11 +58,44 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<ParallelLabDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Add Authentication
+var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "YourSuperSecretKeyHere12345678901234567890";
+var key = Encoding.ASCII.GetBytes(jwtSecret);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequirePremium", policy => 
+        policy.RequireRole("PremiumUser", "Admin"));
+    options.AddPolicy("RequireAdmin", policy => 
+        policy.RequireRole("Admin"));
+});
+
 // Add repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IExerciseSubmissionRepository, ExerciseSubmissionRepository>();
 
 // Add services
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICodeExecutionService, CodeExecutionService>();
 builder.Services.AddScoped<IPerformanceAnalysisService, PerformanceAnalysisService>();
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
@@ -81,6 +117,7 @@ app.UseSwaggerUI(options =>
 
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

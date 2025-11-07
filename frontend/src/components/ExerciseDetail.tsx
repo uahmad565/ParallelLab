@@ -239,19 +239,19 @@ const ExerciseDetail: React.FC = () => {
         <h3>Output & Results</h3>
         {result ? (
           <div>
-            <div>
+              <div>
               {/* Test Results Summary */}
               <div className={`output-panel ${result.submission.isCorrect ? 'success-output' : 'error-output'}`}>
                 <strong>Test Results:</strong> {result.passedTests} / {result.totalTests} passed
                 <br />
                 <strong>Average Execution Time:</strong> {result.submission.executionTimeMs}ms
                 {result.submission.performanceScore > 0 && (
-                  <>
+                    <>
                     <br />
                     <strong>Performance Score:</strong> {result.submission.performanceScore.toFixed(1)}
-                  </>
-                )}
-              </div>
+                    </>
+                  )}
+                </div>
 
               {/* Individual Test Case Results */}
               {result.testCaseResults && result.testCaseResults.length > 0 && (
@@ -306,8 +306,8 @@ const ExerciseDetail: React.FC = () => {
                               </pre>
                             </div>
                           )}
-                        </div>
-                      )}
+                  </div>
+                )}
                     </div>
                   ))}
                 </div>
@@ -318,9 +318,9 @@ const ExerciseDetail: React.FC = () => {
                 <div className="output-panel error-output" style={{ marginTop: '15px' }}>
                   <strong>Compilation Error:</strong><br />
                   <pre style={{ whiteSpace: 'pre-wrap', fontSize: '12px' }}>{result.submission.compilationError}</pre>
-                </div>
-              )}
-            </div>
+              </div>
+                )}
+              </div>
           </div>
         ) : error ? (
           <div className={`output-panel error-output`}>

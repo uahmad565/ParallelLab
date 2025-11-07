@@ -81,14 +81,14 @@ public class SubmissionsController : ControllerBase
                 var passed = runnerResponse.ExitCode == 0 && 
                             !runnerResponse.TimedOut && 
                             actualOutput == expectedOutput;
-
+            
                 if (!passed)
                     allPassed = false;
 
                 if (!string.IsNullOrEmpty(runnerResponse.StandardError) && runnerResponse.ExitCode != 0)
                 {
                     compilationError = runnerResponse.StandardError;
-                }
+            }
 
                 var testCaseResult = new TestCaseResult
                 {
@@ -124,7 +124,7 @@ public class SubmissionsController : ControllerBase
 
             // Save test case results
             foreach (var result in testCaseResults)
-            {
+        {
                 await _submissionRepository.CreateTestCaseResultAsync(result);
             }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Exercise, ExerciseCategory, DifficultyLevel } from '../types';
 import { exerciseApi } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const ExerciseList: React.FC = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -9,6 +10,7 @@ const ExerciseList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const { user, canAccessExercise } = useAuth();
 
   useEffect(() => {
     loadExercises();
@@ -123,9 +125,20 @@ const ExerciseList: React.FC = () => {
               </span>
             </div>
             
-            <Link to={`/exercise/${exercise.id}`} className="btn btn-primary" style={{ width: '100%' }}>
-              Start Exercise
-            </Link>
+            {canAccessExercise(Object.values(DifficultyLevel)[exercise.difficulty]) ? (
+              <Link to={`/exercise/${exercise.id}`} className="btn btn-primary" style={{ width: '100%' }}>
+                Start Exercise
+              </Link>
+            ) : (
+              <div>
+                <button className="btn btn-primary" disabled style={{ width: '100%', opacity: 0.5 }}>
+                  🔒 Premium Only
+                </button>
+                <p style={{ fontSize: '12px', color: '#f59e0b', marginTop: '8px', textAlign: 'center' }}>
+                  Upgrade to Premium to access this exercise
+                </p>
+              </div>
+            )}
           </div>
         ))}
       </div>

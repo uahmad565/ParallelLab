@@ -8,6 +8,44 @@ public static class SeedData
 {
     public static async Task SeedAsync(ParallelLabDbContext context)
     {
+        // Seed demo users
+        if (!await context.Users.AnyAsync())
+        {
+            var users = new List<User>
+            {
+                new User
+                {
+                    Username = "user",
+                    Email = "user@parallellab.com",
+                    FullName = "Demo User",
+                    PasswordHash = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("password"))),
+                    Role = UserRole.User,
+                    IsActive = true
+                },
+                new User
+                {
+                    Username = "premium",
+                    Email = "premium@parallellab.com",
+                    FullName = "Premium User",
+                    PasswordHash = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("password"))),
+                    Role = UserRole.PremiumUser,
+                    IsActive = true
+                },
+                new User
+                {
+                    Username = "admin",
+                    Email = "admin@parallellab.com",
+                    FullName = "Admin User",
+                    PasswordHash = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("password"))),
+                    Role = UserRole.Admin,
+                    IsActive = true
+                }
+            };
+
+            context.Users.AddRange(users);
+            await context.SaveChangesAsync();
+        }
+
         if (await context.Exercises.AnyAsync())
             return;
 
