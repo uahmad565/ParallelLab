@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Editor } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
-import { Exercise, CodeSubmissionRequest, CodeSubmissionResponse, PerformanceLevel } from '../types';
+import { Exercise, CodeSubmissionRequest, CodeSubmissionResponse } from '../types';
 import { exerciseApi, submissionApi } from '../services/api';
 
 const ExerciseDetail: React.FC = () => {
