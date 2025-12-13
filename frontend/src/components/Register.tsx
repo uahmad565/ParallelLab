@@ -47,7 +47,7 @@ const Register: React.FC = () => {
     );
 
     if (result.success) {
-      navigate('/exercises');
+      navigate('/dashboard');
     } else {
       setError(result.message || 'Registration failed');
     }

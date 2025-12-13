@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
-import Home from './components/Home';
+import HomeOrDashboard from './components/HomeOrDashboard';
 import Login from './components/Login';
 import Register from './components/Register';
 import ExerciseList from './components/ExerciseList';
@@ -17,7 +17,8 @@ function App() {
         <div className="App">
           <Navbar />
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<HomeOrDashboard />} />
+            <Route path="/dashboard" element={<HomeOrDashboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/exercises" element={

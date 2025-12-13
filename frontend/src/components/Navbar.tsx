@@ -24,7 +24,8 @@ const Navbar: React.FC = () => {
           <h1>ParallelLab</h1>
         </Link>
         <div className="nav-links">
-          <Link to="/">Home</Link>
+          {!isAuthenticated && <Link to="/">Home</Link>}
+          {isAuthenticated && <Link to="/dashboard">Dashboard</Link>}
           {isAuthenticated && <Link to="/exercises">Practice</Link>}
           {isAuthenticated && <Link to="/submissions">Submissions</Link>}
           
