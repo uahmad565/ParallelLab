@@ -10,7 +10,7 @@ const ExerciseList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
-  const { user, canAccessExercise } = useAuth();
+  const { canAccessExercise } = useAuth();
 
   useEffect(() => {
     loadExercises();

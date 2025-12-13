@@ -94,27 +94,6 @@ const ExerciseDetail: React.FC = () => {
     }
   };
 
-  const getPerformanceClass = (level: PerformanceLevel | number): string => {
-    // Handle both string enum values and numeric values from API
-    let levelStr: string;
-    if (typeof level === 'number') {
-      // Convert numeric enum to string
-      levelStr = Object.values(PerformanceLevel)[level] || 'Average';
-    } else {
-      levelStr = level;
-    }
-    return `performance-${levelStr.toLowerCase().replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-  };
-
-  const getPerformanceLevelDisplay = (level: PerformanceLevel | number): string => {
-    // Handle both string enum values and numeric values from API
-    if (typeof level === 'number') {
-      // Convert numeric enum to string
-      return Object.values(PerformanceLevel)[level] || 'Average';
-    }
-    return level;
-  };
-
   const resetCode = () => {
     if (exercise) {
       setUserCode(exercise.startingCode);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { exerciseApi, submissionApi } from '../services/api';
@@ -17,11 +17,7 @@ const Dashboard: React.FC = () => {
     currentStreak: 0
   });
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -52,7 +48,11 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   const calculateStreak = (submissions: ExerciseSubmission[]): number => {
     // Simple streak calculation - consecutive days with submissions
