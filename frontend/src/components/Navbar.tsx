@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 const Navbar: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -28,6 +29,32 @@ const Navbar: React.FC = () => {
           {isAuthenticated && <Link to="/dashboard">Dashboard</Link>}
           {isAuthenticated && <Link to="/exercises">Practice</Link>}
           {isAuthenticated && <Link to="/submissions">Submissions</Link>}
+          <Link to="/about">About</Link>
+          <Link to="/contact">Contact</Link>
+          
+          <div className="more-menu-container">
+            <button 
+              className="more-menu-trigger"
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
+              onBlur={() => setTimeout(() => setShowMoreMenu(false), 200)}
+            >
+              More
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ marginLeft: '4px' }}>
+                <polyline points="6 9 12 15 18 9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            
+            {showMoreMenu && (
+              <div className="more-menu-dropdown">
+                <Link to="/privacy" className="more-menu-item" onClick={() => setShowMoreMenu(false)}>
+                  Privacy Policy
+                </Link>
+                <Link to="/terms" className="more-menu-item" onClick={() => setShowMoreMenu(false)}>
+                  Terms of Service
+                </Link>
+              </div>
+            )}
+          </div>
           
           {isAuthenticated ? (
             <div className="user-menu-container">
