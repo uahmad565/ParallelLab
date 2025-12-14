@@ -19,7 +19,7 @@ const Contact: React.FC = () => {
   };
 
   const validateMobile = (mobile: string): boolean => {
-    const mobileRegex = /^[\d\s\-\+\(\)]+$/;
+    const mobileRegex = /^[\d\s\-+()]+$/;
     return mobileRegex.test(mobile) && mobile.replace(/\D/g, '').length >= 10;
   };
 
