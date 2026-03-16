@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Exercise, ExerciseSubmission, CodeSubmissionRequest, CodeSubmissionResponse } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -28,7 +28,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url ?? '';
+    const isAuthRequest =
+      requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+
+    if (error.response?.status === 401 && !isAuthRequest) {
       // Token expired or invalid - clear auth data
       localStorage.removeItem('token');
       localStorage.removeItem('user');
