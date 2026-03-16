@@ -124,6 +124,7 @@ app.MapControllers();
 // Redirect root ("/") to the Swagger UI.
 // Place this before app.Run() so it takes effect and is reachable.
 app.MapGet("/", () => Results.Redirect("/swagger", permanent: false));
+app.MapGet("/health", () => Results.Ok("healthy"));
 
 // Ensure database is created and seed data
 using (var scope = app.Services.CreateScope())
