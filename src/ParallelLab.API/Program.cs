@@ -47,7 +47,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+        policy.WithOrigins(
+                "http://localhost:3000",
+                "https://localhost:3000",
+                // Production frontend origin(s)
+                "https://parallellab.online",
+                "https://www.parallellab.online")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
