@@ -2,6 +2,9 @@
 
 A comprehensive web application for learning parallel programming in .NET. Users can complete coding exercises and compare their performance with ideal solutions.
 
+<img width="1536" height="1024" alt="architecture" src="https://github.com/user-attachments/assets/a846b842-09cc-4d76-960d-899444e8d3ea" />
+
+
 ## Features
 
 - **Interactive Code Editor**: Monaco Editor with C# syntax highlighting
