@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "RunC#CodeFiles": {
+      "commandName": "Project",
+      "commandLineArgs": "\"E:\\Learning Repos\\KeyVaultWebApp2\\RunC#CodeFiles\\InputStuff\\Student.cs\" \"E:\\Learning Repos\\KeyVaultWebApp2\\RunC#CodeFiles\\RunC#CodeFiles\\input.txt\" 10000",
+      "environmentVariables": {
+        "OUTPUT_PATH": "C:\\Users\\Usman\\Desktop\\output.txt"
+      }
+    }
+  }
+}
