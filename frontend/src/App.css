@@ -76,7 +76,7 @@
   display: inline-block;
 }
 
-.nav-link-button {
+.nav-links a.nav-link-button {
   color: white;
   background: transparent;
   border: 1px solid #475569;
@@ -87,7 +87,7 @@
   border-color: #64748b;
 }
 
-.nav-link-button-primary {
+.nav-links a.nav-link-button-primary {
   background: #10b981;
   color: white;
 }
@@ -243,7 +243,7 @@
   overflow: hidden;
 }
 
-.more-menu-item {
+.nav-links a.more-menu-item {
   display: block;
   padding: 12px 16px;
   color: #334155;
@@ -252,7 +252,7 @@
   transition: background 0.2s ease;
 }
 
-.more-menu-item:hover {
+.nav-links a.more-menu-item:hover {
   background: #f8fafc;
   color: #0f172a;
 }
